@@ -8,8 +8,8 @@ app = Flask(__name__)
 CORS(app)   # ✅ Allow requests from Netlify frontend
 
 # Load Firebase credentials
-firebase_key = os.getenv("FIREBASE_SERVICE_ACCOUNT")
-firebase_url = os.getenv("FIREBASE_DB_URL")
+firebase_key = os.getenv("FIREBASE_KEY")
+firebase_url = os.getenv("FIREBASE_URL")
 
 if firebase_key and firebase_url:
     try:
@@ -21,13 +21,13 @@ if firebase_key and firebase_url:
     except Exception as e:
         print(f"⚠️ Firebase initialization failed: {e}")
 else:
-    print("⚠️ WARNING: FIREBASE_SERVICE_ACCOUNT or FIREBASE_DB_URL not set")
+    print("⚠️ WARNING: FIREBASE_KEY or FIREBASE_URL not set")
 
 # -------------------- ROUTES --------------------
 
 @app.route("/")
 def home():
-    return jsonify({"message": "NeuroWaste API is running 🚀"})
+    return jsonify({"message": "NeuroWaste is running "})
 
 @app.route("/update", methods=["POST"])
 def update_bin():
