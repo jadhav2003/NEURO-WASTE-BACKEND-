@@ -2,18 +2,17 @@ import os
 from flask import Flask, request, jsonify
 import firebase_admin
 from firebase_admin import credentials, db
-from flask_cors import CORS   # ✅ Added for frontend-backend connection
+from flask_cors import CORS   # ✅ For frontend-backend connection
 
 app = Flask(__name__)
-CORS(app)   # ✅ Allow requests from Netlify frontend
+CORS(app)
 
-# Load Firebase credentials
-firebase_key = os.getenv("FIREBASE_KEY")
+# -------------------- FIREBASE INITIALIZATION --------------------
 firebase_url = os.getenv("FIREBASE_URL")
 
-if firebase_key and firebase_url:
+if firebase_url:
     try:
-        cred = credentials.Certificate("serviceAccountKey.json")
+        cred = credentials.Certificate("serviceAccountKey.json")  # Must be uploaded in project root
         firebase_admin.initialize_app(cred, {
             "databaseURL": firebase_url
         })
@@ -21,16 +20,17 @@ if firebase_key and firebase_url:
     except Exception as e:
         print(f"⚠️ Firebase initialization failed: {e}")
 else:
-    print("⚠️ WARNING: FIREBASE_KEY or FIREBASE_URL not set")
+    print("⚠️ WARNING: FIREBASE_URL not set")
 
 # -------------------- ROUTES --------------------
-
 @app.route("/")
 def home():
-    return jsonify({"message": "NeuroWaste is running "})
+    return jsonify({"status": "✅ NeuroWaste Backend is running!"})
+
 
 @app.route("/update", methods=["POST"])
 def update_bin():
+    """Update bin level in Firebase"""
     data = request.json
     if not data:
         return jsonify({"error": "No data received"}), 400
@@ -48,8 +48,10 @@ def update_bin():
     except Exception as e:
         return jsonify({"error": f"Failed to update Firebase: {e}"}), 500
 
+
 @app.route("/bins", methods=["GET"])
 def get_bins():
+    """Fetch all bin data"""
     try:
         ref = db.reference("/bins")
         bins = ref.get()
@@ -57,7 +59,7 @@ def get_bins():
     except Exception as e:
         return jsonify({"error": f"Failed to fetch bins: {e}"}), 500
 
+
 # -------------------- ENTRYPOINT --------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
-
